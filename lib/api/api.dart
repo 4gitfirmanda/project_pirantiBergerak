@@ -44,7 +44,8 @@ class Api {
 
   // Fetch movie detail
   Future<Movie> getMovieDetail(int movieId) async {
-    final url = '$_baseUrl/movie/$movieId?api_key=${Constants.apiKey}&language=en-US';
+    final url =
+        '$_baseUrl/movie/$movieId?api_key=${Constants.apiKey}&language=en-US';
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
@@ -55,6 +56,23 @@ class Api {
       }
     } catch (e) {
       throw Exception('Error fetching movie details: $e');
+    }
+  }
+
+  // NEW: Method for Searching Movies
+  Future<List<Movie>> searchMovies(String query) async {
+    final url =
+        '$_baseUrl/search/movie?query=$query&include_adult=false&language=en-US&api_key=${Constants.apiKey}';
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final List decodedData = json.decode(response.body)['results'];
+        return decodedData.map((movie) => Movie.fromJson(movie)).toList();
+      } else {
+        throw Exception('Failed to load search results: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching search results: $e');
     }
   }
 }

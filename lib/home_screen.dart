@@ -18,6 +18,10 @@ class _HomeScreenState extends State<HomeScreen> {
   late Future<List<Movie>> topRatedMovies;
   late Future<List<Movie>> upcomingMovies;
 
+  // Search State
+  Future<List<Movie>>? searchResults;
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -38,6 +42,17 @@ class _HomeScreenState extends State<HomeScreen> {
           fit: BoxFit.contain,
         ),
         centerTitle: true,
+        leading: searchResults != null
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () {
+                  setState(() {
+                    searchResults = null; // Hapus hasil pencarian
+                    _searchController.clear(); // Kosongkan input teks
+                  });
+                },
+              )
+            : null,
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
@@ -46,15 +61,42 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Trending Movies Section
-              SectionTitle(title: 'Trending Movies'),
-              Padding(
-                padding: const EdgeInsets.only(top: 16.0),
-                child: Text(
-                  '',
-                  style: GoogleFonts.aBeeZee(fontSize: 25),
+              // Search Bar
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  border: Border.all(color: Colors.white54), // Border transparan
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  style: const TextStyle(color: Colors.white), // Text putih
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.search, color: Colors.white),
+                    hintText: 'Search movies...',
+                    hintStyle: const TextStyle(color: Colors.white54),
+                    border: InputBorder.none, // Hilangkan border
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 14.0,
+                      horizontal: 16.0,
+                    ),
+                  ),
+                  onSubmitted: (query) => _onSearch(query),
                 ),
               ),
+              const SizedBox(height: 16),
+
+              // Display Search Results (if available)
+              if (searchResults != null)
+                FutureBuilder<List<Movie>>(
+                  future: searchResults,
+                  builder: (context, snapshot) {
+                    return _buildSearchResults(snapshot);
+                  },
+                ),
+
+              // Trending Movies Section (Always visible)
+              SectionTitle(title: 'Trending Movies'),
               const SizedBox(height: 16),
               FutureBuilder<List<Movie>>(
                 future: trendingMovies,
@@ -62,15 +104,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
-                    return Center(
-                      child: Text('Error: ${snapshot.error}'),
-                    );
+                    return Center(child: Text('Error: ${snapshot.error}'));
                   } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                     return TrendingSlider(snapshot: snapshot);
                   } else {
-                    return const Center(
-                      child: Text('No movies available'),
-                    );
+                    return const Center(child: Text('No movies available'));
                   }
                 },
               ),
@@ -97,6 +135,26 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  // Search Method
+  void _onSearch(String query) {
+    setState(() {
+      searchResults = Api().searchMovies(query);
+    });
+  }
+
+  // Build Search Results
+  Widget _buildSearchResults(AsyncSnapshot<List<Movie>> snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const Center(child: CircularProgressIndicator());
+    } else if (snapshot.hasError) {
+      return Center(child: Text('Error: ${snapshot.error}'));
+    } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+      return MoviesSlider(movies: snapshot.data!);
+    } else {
+      return const Center(child: Text('No results found'));
+    }
   }
 
   // Method to build each movie section
@@ -126,39 +184,6 @@ class SectionTitle extends StatelessWidget {
       child: Text(
         title,
         style: GoogleFonts.aBeeZee(fontSize: 25, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-}
-
-// Widget for auto-slide Trending Movies
-class TrendingMoviesSlider extends StatelessWidget {
-  final List<Movie> movies;
-
-  const TrendingMoviesSlider({required this.movies});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 250,
-      child: PageView.builder(
-        itemCount: movies.length,
-        controller: PageController(viewportFraction: 0.8, keepPage: true),
-        itemBuilder: (context, index) {
-          final movie = movies[index];
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                '${Constants.imagePath}${movie.posterPath}',
-                width: 150,
-                height: 225,
-                fit: BoxFit.cover,
-              ),
-            ),
-          );
-        },
       ),
     );
   }
