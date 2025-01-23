@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluflix/api/api.dart';
 import 'package:fluflix/models/movie.dart';
-import 'package:fluflix/constants.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 class MovieDetailScreen extends StatefulWidget {
   final int movieId;
@@ -16,12 +15,27 @@ class MovieDetailScreen extends StatefulWidget {
 class _MovieDetailScreenState extends State<MovieDetailScreen> {
   late Future<Movie> movieDetail;
   late Future<String?> movieTrailerKey; // Untuk trailer
+  late YoutubePlayerController _youtubeController;
 
   @override
   void initState() {
     super.initState();
-    movieDetail = Api().getMovieDetail(widget.movieId); // Mendapatkan detail film
-    movieTrailerKey = Api().getMovieTrailer(widget.movieId); // Mendapatkan trailer
+    movieDetail = Api().getMovieDetail(widget.movieId);
+    movieTrailerKey = Api().getMovieTrailer(widget.movieId);
+
+    // Inisialisasi controller dengan video default sementara
+    _youtubeController = YoutubePlayerController(
+      params: const YoutubePlayerParams(
+        showControls: true,
+        showFullscreenButton: true,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _youtubeController.close();
+    super.dispose();
   }
 
   @override
@@ -48,22 +62,19 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                 FutureBuilder<String?>(
                   future: movieTrailerKey,
                   builder: (context, trailerSnapshot) {
-                    if (trailerSnapshot.connectionState == ConnectionState.waiting) {
+                    if (trailerSnapshot.connectionState ==
+                        ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     } else if (trailerSnapshot.hasError) {
                       return const Text('Failed to load trailer');
-                    } else if (trailerSnapshot.hasData && trailerSnapshot.data != null) {
+                    } else if (trailerSnapshot.hasData &&
+                        trailerSnapshot.data != null) {
                       final youtubeKey = trailerSnapshot.data!;
+                      _youtubeController.loadVideoById(videoId: youtubeKey);
                       return AspectRatio(
                         aspectRatio: 16 / 9,
                         child: YoutubePlayer(
-                          controller: YoutubePlayerController(
-                            initialVideoId: youtubeKey,
-                            flags: const YoutubePlayerFlags(
-                              autoPlay: true,
-                              mute: false,
-                            ),
-                          ),
+                          controller: _youtubeController,
                         ),
                       );
                     } else {
@@ -76,7 +87,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   // child: Image.network(
-                  //   '${Constants.imagePath}${movie.backdropPath}',
+                  //   'https://image.tmdb.org/t/p/w500${movie.backdropPath}',
                   //   height: 250,
                   //   width: double.infinity,
                   //   fit: BoxFit.cover,
@@ -85,7 +96,8 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                 const SizedBox(height: 16),
                 Text(
                   movie.title,
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -100,7 +112,8 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'Overview:',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Text(
