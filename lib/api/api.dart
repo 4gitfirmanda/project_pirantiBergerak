@@ -59,20 +59,41 @@ class Api {
     }
   }
 
-  // NEW: Method for Searching Movies
+  // Fetch movie trailer
+  Future<String?> getMovieTrailer(int movieId) async {
+    final url =
+        '$_baseUrl/movie/$movieId/videos?language=en-US&api_key=${Constants.apiKey}';
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final List decodedData = json.decode(response.body)['results'];
+        final trailer = decodedData.firstWhere(
+          (video) => video['type'] == 'Trailer' && video['site'] == 'YouTube',
+          orElse: () => null,
+        );
+        return trailer != null ? trailer['key'] : null;
+      } else {
+        throw Exception('Failed to load trailer: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching trailer: $e');
+    }
+  }
+
+  // Method for searching movies
   Future<List<Movie>> searchMovies(String query) async {
     final url =
-        '$_baseUrl/search/movie?query=$query&include_adult=false&language=en-US&api_key=${Constants.apiKey}';
+        '$_baseUrl/search/movie?query=${Uri.encodeQueryComponent(query)}&api_key=${Constants.apiKey}&language=en-US&page=1&include_adult=false';
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final List decodedData = json.decode(response.body)['results'];
         return decodedData.map((movie) => Movie.fromJson(movie)).toList();
       } else {
-        throw Exception('Failed to load search results: ${response.statusCode}');
+        throw Exception('Failed to search movies: ${response.statusCode}');
       }
     } catch (e) {
-      throw Exception('Error fetching search results: $e');
+      throw Exception('Error searching movies: $e');
     }
   }
 }
