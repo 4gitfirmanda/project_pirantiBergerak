@@ -53,6 +53,83 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               )
             : null,
+        actions: [
+          Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.menu, color: Colors.white),
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer(); // Membuka drawer
+              },
+            ),
+          ),
+        ],
+      ),
+      endDrawer: Drawer(
+        backgroundColor: Colors.black87,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: const BoxDecoration(
+                color: Colors.redAccent,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.movie, size: 40, color: Colors.white),
+                  const SizedBox(height: 10),
+                  Text(
+                    'FlutFlix Menu',
+                    style: GoogleFonts.aBeeZee(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.trending_up, color: Colors.white),
+              title: const Text('Trending Movies',
+                  style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context); // Tutup drawer
+                Navigator.pushNamed(
+                    context, '/trendingMovies'); // Navigasi ke Trending Movies
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.star, color: Colors.white),
+              title: const Text('Top Rated Movies',
+                  style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context); // Tutup drawer
+                Navigator.pushNamed(
+                    context, '/topRatedMovies'); // Navigasi ke Top Rated Movies
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.upcoming, color: Colors.white),
+              title: const Text('Upcoming Movies',
+                  style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context); // Tutup drawer
+                Navigator.pushNamed(
+                    context, '/upcomingMovies'); // Navigasi ke Upcoming Movies
+              },
+            ),
+            ListTile(
+              leading:
+                  const Icon(Icons.category, color: Colors.white), // Ikon Genre
+              title: const Text('Genre', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context); // Tutup drawer
+                Navigator.pushNamed(context, '/genre'); // Navigasi ke Genre
+              },
+            ),
+          ],
+        ),
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
@@ -65,7 +142,8 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 decoration: BoxDecoration(
                   color: Colors.transparent,
-                  border: Border.all(color: Colors.white54), // Border transparan
+                  border:
+                      Border.all(color: Colors.white54), // Border transparan
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: TextField(

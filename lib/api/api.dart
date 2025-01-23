@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:fluflix/constants.dart';
 import 'package:fluflix/models/movie.dart';
+import 'package:fluflix/models/genre.dart';
 import 'package:http/http.dart' as http;
 
 class Api {
@@ -11,6 +12,8 @@ class Api {
       '$_baseUrl/movie/top_rated?language=en-US&page=1&api_key=${Constants.apiKey}';
   static const _upcomingUrl =
       '$_baseUrl/movie/upcoming?language=en-US&page=1&api_key=${Constants.apiKey}';
+  static const _genresUrl =
+      '$_baseUrl/genre/movie/list?api_key=${Constants.apiKey}&language=en-US';
 
   // Method for Trending Movies
   Future<List<Movie>> getTrendingMovies() async {
@@ -94,6 +97,41 @@ class Api {
       }
     } catch (e) {
       throw Exception('Error searching movies: $e');
+    }
+  }
+
+  // Fetch genres
+// Fetch movies by genre
+  Future<List<Movie>> getMoviesByGenre(int genreId) async {
+    final url =
+        '$_baseUrl/discover/movie?api_key=${Constants.apiKey}&language=en-US&with_genres=$genreId';
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final List decodedData = json.decode(response.body)['results'];
+        return decodedData.map((movie) => Movie.fromJson(movie)).toList();
+      } else {
+        throw Exception(
+            'Failed to load movies by genre: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching movies by genre: $e');
+    }
+  }
+
+  Future<List<Genre>> getGenres() async {
+    const url =
+        '$_baseUrl/genre/movie/list?api_key=${Constants.apiKey}&language=en-US';
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return (data['genres'] as List).map((e) => Genre.fromJson(e)).toList();
+      } else {
+        throw Exception('Failed to load genres: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching genres: $e');
     }
   }
 }

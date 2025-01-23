@@ -1,5 +1,10 @@
 import 'package:fluflix/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:fluflix/trending_movies_screen.dart';
+import 'package:fluflix/top_rated_movies_screen.dart';
+import 'package:fluflix/upcoming_movies_screen.dart';
+import 'package:fluflix/top_rated_movies_screen.dart';
+import 'package:fluflix/genre_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,6 +22,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: Colours.scaffoldBgColors,
       ),
+      routes: {
+        '/trendingMovies': (context) => const TrendingMoviesScreen(),
+        '/topRatedMovies': (context) => const TopRatedMoviesScreen(),
+        '/upcomingMovies': (context) => const UpcomingMoviesScreen(),
+        '/genre': (context) => const GenreScreen(),
+      },
       home: const HomeScreen(),
     );
   }
@@ -24,9 +35,9 @@ class MyApp extends StatelessWidget {
 
 // Definisi kelas Colours dengan warna kustom
 class Colours {
-  static const Color scaffoldBgColors = Color(0xFF121212); // Ganti dengan warna yang Anda inginkan
+  static const Color scaffoldBgColors =
+      Color(0xFF121212); // Ganti dengan warna yang Anda inginkan
 }
-
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
