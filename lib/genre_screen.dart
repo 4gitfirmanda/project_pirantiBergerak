@@ -11,7 +11,7 @@ class GenreScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Genres'),
-        backgroundColor: Colors.redAccent,
+        backgroundColor: const Color.fromARGB(255, 163, 3, 3),
       ),
       body: FutureBuilder<List<Genre>>(
         future: Api().getGenres(),

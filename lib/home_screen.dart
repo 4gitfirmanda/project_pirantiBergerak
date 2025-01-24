@@ -71,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             DrawerHeader(
               decoration: const BoxDecoration(
-                color: Colors.redAccent,
+                color: Color.fromARGB(255, 163, 3, 3),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
